@@ -29,7 +29,7 @@ export class Block {
   startedAt: Date;
 
   @Column({ nullable: true })
-  resolvedAt: Date;
+  resolvedAt: Date | null;
 
   // Computed duration in milliseconds (can be calculated on-the-fly)
   @Column({ type: 'bigint', default: 0 })

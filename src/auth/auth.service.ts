@@ -101,6 +101,10 @@ export class AuthService {
     await this.userRepository.update(userId, updateData);
     const updatedUser = await this.userRepository.findOne({ where: { id: userId } });
 
+    if (!updatedUser) {
+      throw new UnauthorizedException('User not found after update');
+    }
+
     return this.toUserResponse(updatedUser);
   }
 

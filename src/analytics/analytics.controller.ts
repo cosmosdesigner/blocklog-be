@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AuthenticatedRequest } from '../common/interfaces';
 
 @Controller('analytics')
 @UseGuards(JwtAuthGuard)
@@ -17,13 +18,13 @@ export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
   @Get('dashboard')
-  async getDashboardStats(@Request() req) {
+  async getDashboardStats(@Request() req: AuthenticatedRequest) {
     return this.analyticsService.getDashboardStats(req.user.id);
   }
 
   @Get('monthly')
   async getMonthlyStats(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Query('year', new DefaultValuePipe(new Date().getFullYear()), ParseIntPipe) year: number,
   ) {
     return this.analyticsService.getMonthlyStats(req.user.id, year);
@@ -31,7 +32,7 @@ export class AnalyticsController {
 
   @Get('daily')
   async getDailyStats(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Query('year', new DefaultValuePipe(new Date().getFullYear()), ParseIntPipe) year: number,
     @Query('month', new DefaultValuePipe(new Date().getMonth() + 1), ParseIntPipe) month: number,
   ) {
@@ -40,7 +41,7 @@ export class AnalyticsController {
 
   @Get('calendar')
   async getYearlyCalendarData(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Query('year', new DefaultValuePipe(new Date().getFullYear()), ParseIntPipe) year: number,
   ) {
     return this.analyticsService.getYearlyCalendarData(req.user.id, year);
@@ -49,7 +50,7 @@ export class AnalyticsController {
   @Get('export')
   @Header('Content-Type', 'application/json')
   @Header('Content-Disposition', 'attachment; filename="blocklog-export.json"')
-  async exportUserData(@Request() req) {
+  async exportUserData(@Request() req: AuthenticatedRequest) {
     return this.analyticsService.exportUserData(req.user.id);
   }
 }

@@ -5,6 +5,8 @@ export interface JwtPayload {
   exp?: number;
 }
 
+export { AuthenticatedRequest } from './interfaces/authenticated-request.interface';
+
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;

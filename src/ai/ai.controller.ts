@@ -13,6 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Block } from '../entities/block.entity';
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { AuthenticatedRequest } from '../common/interfaces';
 
 class AnalyzeBlockDto {
   @IsString()
@@ -68,7 +69,7 @@ export class AiController {
   }
 
   @Post('analyze')
-  async analyzeBlock(@Request() req, @Body() analyzeBlockDto: AnalyzeBlockDto) {
+  async analyzeBlock(@Request() req: AuthenticatedRequest, @Body() analyzeBlockDto: AnalyzeBlockDto) {
     if (!this.aiService.isAvailable()) {
       throw new BadRequestException('AI service is not available');
     }
@@ -83,7 +84,7 @@ export class AiController {
   }
 
   @Post('similar')
-  async findSimilarBlocks(@Request() req, @Body() similarBlocksDto: SimilarBlocksDto) {
+  async findSimilarBlocks(@Request() req: AuthenticatedRequest, @Body() similarBlocksDto: SimilarBlocksDto) {
     if (!this.aiService.isAvailable()) {
       throw new BadRequestException('AI service is not available');
     }
@@ -108,7 +109,7 @@ export class AiController {
   }
 
   @Post('resolve')
-  async generateResolution(@Request() req, @Body() generateResolutionDto: GenerateResolutionDto) {
+  async generateResolution(@Request() req: AuthenticatedRequest, @Body() generateResolutionDto: GenerateResolutionDto) {
     if (!this.aiService.isAvailable()) {
       throw new BadRequestException('AI service is not available');
     }
