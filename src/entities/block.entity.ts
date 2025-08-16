@@ -28,7 +28,7 @@ export class Block {
   @CreateDateColumn()
   startedAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   resolvedAt: Date | null;
 
   // Computed duration in milliseconds (can be calculated on-the-fly)
