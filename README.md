@@ -1,393 +1,224 @@
-# Blocklog Backend API
+# Blocklog Backend API 🚀
 
-A comprehensive NestJS backend for the Blocklog productivity tracking application. This API provides user authentication, block management, tagging, analytics, and AI-powered suggestions.
+A production-ready NestJS backend for the Blocklog productivity tracking application. This API provides user authentication, block management, tagging, analytics, and AI-powered suggestions with full production deployment configuration.
+
+## ✨ Current Status
+
+🟢 **PRODUCTION DEPLOYED** - Running live at `http://45.63.74.179:8080`
+- ✅ Production server configured with PM2
+- ✅ Nginx reverse proxy setup  
+- ✅ PostgreSQL database with sample data
+- ✅ JWT authentication working
+- ✅ SSL-ready configuration
+- ✅ Auto-restart and monitoring enabled
 
 ## 🚀 Features
 
 - **User Authentication**: JWT-based authentication with registration and login
-- **Block Management**: Full CRUD operations for productivity blocks
-- **Tagging System**: Categorize blocks with customizable tags
-- **Analytics**: Dashboard statistics, monthly/daily reports, and data export
-- **AI Integration**: Google GenAI-powered block analysis and suggestions
-- **Real-time Duration**: Live duration tracking for ongoing blocks
+- **Block Management**: Full CRUD operations for productivity blocks with real-time duration tracking
+- **Tagging System**: Categorize blocks with customizable colors and descriptions
+- **Analytics Dashboard**: Comprehensive statistics, monthly/daily reports, and data export
+- **AI Integration**: Google GenAI-powered block analysis and resolution suggestions
+- **Production Ready**: PM2 process management, Nginx proxy, and monitoring
 - **Data Export**: JSON export functionality for data portability
 
 ## 🛠️ Tech Stack
 
-- **Framework**: NestJS 10
-- **Database**: PostgreSQL with TypeORM
-- **Authentication**: JWT with Passport
+- **Framework**: NestJS 10 + TypeScript
+- **Database**: PostgreSQL 14 with TypeORM
+- **Authentication**: JWT with Passport Strategy
 - **AI**: Google Generative AI (Gemini)
+- **Process Manager**: PM2 with ecosystem configuration
+- **Reverse Proxy**: Nginx with CORS support
 - **Validation**: class-validator & class-transformer
-- **Language**: TypeScript
+- **Security**: bcrypt password hashing, input validation
 
 ## 📁 Project Structure
 
 ```
 src/
-├── auth/              # Authentication module (JWT, guards, strategies)
-├── blocks/            # Block management (CRUD operations)
-├── tags/              # Tag management system
-├── analytics/         # Dashboard & reporting endpoints
-├── ai/                # AI-powered analysis & suggestions
-├── entities/          # TypeORM database entities
-├── dto/               # Data Transfer Objects
+├── auth/              # JWT authentication, guards, strategies
+├── blocks/            # Block CRUD operations and business logic
+├── tags/              # Tag management with color customization
+├── analytics/         # Dashboard statistics and reporting
+├── ai/                # Google GenAI integration for suggestions
+├── entities/          # TypeORM database entities (User, Block, Tag)
+├── dto/               # Data Transfer Objects with validation
 ├── common/            # Shared interfaces, filters, utilities
-└── main.ts            # Application bootstrap
+└── main.ts            # Application bootstrap and CORS config
+
+# Production Files
+├── ecosystem.config.js # PM2 production configuration
+├── .env               # Production environment variables
+└── README.md          # This file
 ```
 
-## ⚙️ Installation & Setup
+## 🚀 Deployment Guide
 
-### Prerequisites
+### Option 1: Use Production Instance (Recommended)
 
+The API is already deployed and ready to use:
+- **API URL**: `http://45.63.74.179:8080`
+- **Status**: Running with PM2 + Nginx
+- **Database**: PostgreSQL with sample data
+- **Monitoring**: Logs available via PM2
+
+### Option 2: Deploy Your Own Instance
+
+#### Prerequisites
+- Ubuntu/Debian server
 - Node.js 18+
 - PostgreSQL 12+
-- npm or yarn
+- Nginx
+- PM2
 
-### 1. Clone & Install Dependencies
+#### Quick Deployment Steps
 
 ```bash
-git clone <repository-url>
+# 1. Clone and setup
+git clone https://github.com/cosmosdesigner/blocklog-be.git
 cd blocklog-be
 npm install
-```
-
-### 2. Environment Configuration
-
-Copy `.env.example` to `.env` and configure:
-
-```bash
-# Database Configuration
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=password
-DATABASE_NAME=blocklog
-
-# Application Configuration
-PORT=3000
-NODE_ENV=development
-
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_EXPIRES_IN=7d
-
-# Google AI Configuration (optional for AI features)
-GOOGLE_AI_API_KEY=your-google-ai-api-key
-
-# CORS Configuration
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173,http://localhost:4173
-```
-
-### 3. Database Setup
-
-Create a PostgreSQL database:
-
-```sql
-CREATE DATABASE blocklog;
-```
-
-The application will automatically create tables when you start it in development mode.
-
-### 4. Start the Application
-
-```bash
-# Development
-npm run start:dev
-
-# Production
 npm run build
-npm run start:prod
+
+# 2. Database setup
+sudo -u postgres createdb blocklog
+sudo -u postgres psql -d blocklog -f database-schema.sql
+
+# 3. Environment configuration
+cp .env.example .env
+# Edit .env with your database credentials and JWT secret
+
+# 4. Start with PM2
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup
+
+# 5. Configure Nginx (optional)
+# Copy provided nginx configuration
+sudo nginx -t && sudo systemctl reload nginx
+
+# 6. Configure firewall
+sudo ufw allow 8080  # API port
+sudo ufw allow 80    # HTTP
+sudo ufw allow 443   # HTTPS
 ```
 
-The API will be available at `http://localhost:3000`
+## 📊 API Documentation
 
-## 🔐 API Endpoints
+### Authentication Endpoints
 
-### Authentication
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/auth/register` | Register new user | ❌ |
+| POST | `/auth/login` | User login | ❌ |
+| GET | `/auth/profile` | Get current user profile | ✅ |
+| PUT | `/auth/profile` | Update user profile | ✅ |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register` | Register new user |
-| POST | `/auth/login` | User login |
-| GET | `/auth/profile` | Get current user profile |
-| PUT | `/auth/profile` | Update user profile |
+### Block Management
 
-### Blocks
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/blocks` | Get all blocks (paginated, filterable) | ✅ |
+| POST | `/blocks` | Create new block | ✅ |
+| GET | `/blocks/ongoing` | Get only ongoing blocks | ✅ |
+| GET | `/blocks/:id` | Get specific block with tags | ✅ |
+| PUT | `/blocks/:id` | Update block details | ✅ |
+| PATCH | `/blocks/:id/resolve` | Mark block as resolved | ✅ |
+| DELETE | `/blocks/:id` | Delete block | ✅ |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/blocks` | Get all blocks (with filtering) |
-| POST | `/blocks` | Create new block |
-| GET | `/blocks/ongoing` | Get ongoing blocks |
-| GET | `/blocks/:id` | Get specific block |
-| PUT | `/blocks/:id` | Update block |
-| PATCH | `/blocks/:id/resolve` | Resolve block |
-| DELETE | `/blocks/:id` | Delete block |
+### Tag System
 
-### Tags
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/tags` | Get all user tags | ✅ |
+| POST | `/tags` | Create new tag | ✅ |
+| GET | `/tags/stats` | Get tag usage statistics | ✅ |
+| GET | `/tags/:id` | Get specific tag | ✅ |
+| PUT | `/tags/:id` | Update tag (name, color, description) | ✅ |
+| DELETE | `/tags/:id` | Delete tag | ✅ |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/tags` | Get all user tags |
-| POST | `/tags` | Create new tag |
-| GET | `/tags/stats` | Get tag statistics |
-| GET | `/tags/:id` | Get specific tag |
-| PUT | `/tags/:id` | Update tag |
-| DELETE | `/tags/:id` | Delete tag |
+### Analytics & Reporting
 
-### Analytics
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/analytics/dashboard` | Dashboard statistics overview | ✅ |
+| GET | `/analytics/monthly?year=2024` | Monthly breakdown | ✅ |
+| GET | `/analytics/daily?year=2024&month=1` | Daily statistics | ✅ |
+| GET | `/analytics/calendar?year=2024` | Calendar heatmap data | ✅ |
+| GET | `/analytics/export` | Export all user data as JSON | ✅ |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/analytics/dashboard` | Dashboard statistics |
-| GET | `/analytics/monthly?year=2024` | Monthly statistics |
-| GET | `/analytics/daily?year=2024&month=1` | Daily statistics |
-| GET | `/analytics/calendar?year=2024` | Yearly calendar data |
-| GET | `/analytics/export` | Export user data as JSON |
+### AI-Powered Features (Optional)
 
-### AI (Optional)
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/ai/status` | Check AI service availability | ✅ |
+| POST | `/ai/analyze` | Analyze block and get insights | ✅ |
+| POST | `/ai/similar` | Find similar historical blocks | ✅ |
+| POST | `/ai/resolve` | Generate resolution suggestions | ✅ |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/ai/status` | Check AI service availability |
-| POST | `/ai/analyze` | Analyze block with AI |
-| POST | `/ai/similar` | Find similar blocks |
-| POST | `/ai/resolve` | Generate resolution suggestions |
+## 🔍 Query Parameters & Filtering
 
-## 📝 API Examples
-
-### Register User
-
-```bash
-POST /auth/register
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "firstName": "John",
-  "lastName": "Doe"
-}
-```
-
-### Create Block
-
-```bash
-POST /blocks
-Authorization: Bearer <jwt-token>
-Content-Type: application/json
-
-{
-  "title": "API Integration Issue",
-  "reason": "Third-party API returning 500 errors",
-  "tagIds": ["tag-uuid-1", "tag-uuid-2"]
-}
-```
-
-### Get Dashboard Stats
-
-```bash
-GET /analytics/dashboard
-Authorization: Bearer <jwt-token>
-```
-
-Response:
-```json
-{
-  "totalBlocks": 45,
-  "ongoingBlocks": 3,
-  "resolvedBlocks": 42,
-  "totalTimeBlocked": 12345678,
-  "averageBlockTime": 876543,
-  "longestBlock": {
-    "id": "uuid",
-    "title": "Database Migration",
-    "duration": 3600000
-  }
-}
-```
-
-### AI Block Analysis
-
-```bash
-POST /ai/analyze
-Authorization: Bearer <jwt-token>
-Content-Type: application/json
-
-{
-  "title": "Database Connection Timeout",
-  "reason": "Application cannot connect to PostgreSQL database after server restart",
-  "context": "Production environment, high traffic"
-}
-```
-
-## 🔍 Query Parameters
-
-### Blocks Filtering
-
+### Blocks Endpoint
 ```bash
 GET /blocks?status=ongoing&search=database&tagIds=uuid1,uuid2&startDate=2024-01-01&endDate=2024-12-31&page=1&limit=10
 ```
 
-Parameters:
+**Parameters**:
 - `status`: `ongoing` | `resolved`
-- `search`: Search in title/reason
+- `search`: Search in title/reason (case-insensitive)
 - `tagIds`: Comma-separated tag UUIDs
-- `startDate`: ISO date string
-- `endDate`: ISO date string
+- `startDate` / `endDate`: ISO date strings for date range
 - `page`: Page number (default: 1)
-- `limit`: Items per page (default: 10)
+- `limit`: Items per page (default: 10, max: 100)
 
 ## 🛡️ Security Features
 
-- **JWT Authentication**: Secure token-based authentication
-- **Password Hashing**: bcrypt with salt rounds
-- **Input Validation**: Comprehensive DTO validation
-- **CORS Protection**: Configurable origins
-- **Error Handling**: Structured error responses
-- **Request Logging**: Comprehensive request/response logging
+- **JWT Authentication**: Secure token-based auth with configurable expiration
+- **Password Security**: bcrypt hashing with salt rounds
+- **Input Validation**: Comprehensive DTO validation with class-validator
+- **CORS Protection**: Configurable origins for cross-origin requests
+- **SQL Injection Protection**: TypeORM parameterized queries
+- **Environment Variables**: Sensitive data in environment configuration
+- **Production Hardening**: Separate production/development configurations
 
-## 📊 Database Schema
+## ⚡ Performance Optimizations
 
-### Users
-- `id` (UUID, Primary Key)
-- `email` (String, Unique)
-- `password` (String, Hashed)
-- `firstName` (String)
-- `lastName` (String)
-- `isActive` (Boolean)
-- `createdAt`, `updatedAt` (Timestamps)
+- **Database Indexing**: Optimized indexes on frequently queried fields
+- **Pagination**: All list endpoints support efficient pagination
+- **Query Optimization**: Efficient joins and selective field loading
+- **Response Caching**: Headers set for appropriate caching
+- **Connection Pooling**: PostgreSQL connection pooling via TypeORM
+- **Memory Management**: PM2 memory limit and auto-restart
 
-### Blocks
-- `id` (UUID, Primary Key)
-- `title` (String)
-- `reason` (Text)
-- `status` (Enum: ongoing, resolved)
-- `startedAt` (DateTime)
-- `resolvedAt` (DateTime, Nullable)
-- `duration` (BigInt, milliseconds)
-- `userId` (UUID, Foreign Key)
-- `createdAt`, `updatedAt` (Timestamps)
 
-### Tags
-- `id` (UUID, Primary Key)
-- `name` (String)
-- `description` (String, Nullable)
-- `color` (String, Hex color)
-- `userId` (UUID, Foreign Key)
-- `createdAt`, `updatedAt` (Timestamps)
+## 📈 Monitoring & Logging
 
-### Block-Tag Relationship
-Many-to-many relationship via junction table `block_tags`
+### Application Logs
+- **PM2 Logs**: `/var/log/pm2/blocklog-be-*.log`
+- **Error Logs**: Detailed error tracking with stack traces
+- **Request Logs**: HTTP request/response logging
+- **Database Logs**: SQL query logging in development
 
-## 🧪 Testing
+### System Monitoring
+- **PM2 Dashboard**: Built-in process monitoring
+- **Nginx Logs**: Access and error logs
+- **Database Monitoring**: PostgreSQL query performance
+- **Resource Usage**: CPU, memory, disk usage via PM2
 
-```bash
-# Unit tests
-npm run test
 
-# E2E tests
-npm run test:e2e
+### Getting Help
 
-# Test coverage
-npm run test:cov
-```
-
-## 🚀 Deployment
-
-### Docker (Recommended)
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist/ ./dist/
-EXPOSE 3000
-CMD ["node", "dist/main.js"]
-```
-
-### Environment Variables for Production
-
-Ensure these are set securely:
-- `JWT_SECRET`: Strong, unique secret
-- `DATABASE_*`: Production database credentials
-- `GOOGLE_AI_API_KEY`: For AI features
-- `NODE_ENV=production`
-
-## 🔧 Development
-
-### Code Style
-
-- ESLint + Prettier configuration included
-- Run `npm run lint` to check code style
-- Run `npm run format` to format code
-
-### Database Migrations
-
-For production, disable `synchronize` and use TypeORM migrations:
-
-```bash
-npm run migration:generate -- -n MigrationName
-npm run migration:run
-```
-
-## 📈 Performance Considerations
-
-- **Database Indexing**: Key fields are indexed
-- **Query Optimization**: Efficient queries with proper joins
-- **Pagination**: All list endpoints support pagination
-- **Caching**: Consider Redis for session storage in production
-- **Rate Limiting**: Implement for production usage
-
-## 🤝 API Integration
-
-This backend is designed to work seamlessly with the Blocklog React frontend. The API responses match the expected data structures for:
-
-- Dashboard statistics and charts
-- Real-time block duration updates  
-- Tagging and filtering systems
-- Data export/import functionality
-- AI-powered suggestions and analysis
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-1. **Database Connection**: Ensure PostgreSQL is running and credentials are correct
-2. **JWT Errors**: Verify `JWT_SECRET` is set and consistent
-3. **AI Not Working**: Check `GOOGLE_AI_API_KEY` is valid
-4. **CORS Issues**: Update `ALLOWED_ORIGINS` to include your frontend URL
-
-### Logging
-
-Check application logs for detailed error information. In development, all SQL queries and errors are logged.
+- **Logs**: Check PM2 and Nginx logs for detailed error information
+- **Health Check**: `curl http://45.63.74.179:8080/` should return "Hello World!"
+- **Database**: Verify connection with `sudo -u postgres psql -d blocklog`
 
 ## 📄 License
 
-This project is licensed under the MIT License.
-
-## 🙏 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Built with ❤️ using NestJS + TypeScript**
+**🚀 Production Ready • Built with NestJS + TypeScript**
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+*This backend is currently deployed and serving the Blocklog application with full production monitoring and management.*
