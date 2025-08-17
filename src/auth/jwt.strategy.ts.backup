@@ -6,14 +6,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { JwtPayload } from '../common/interfaces';
-import { TokenBlacklistService } from './token-blacklist.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private tokenBlacklistService: TokenBlacklistService,
     configService: ConfigService,
   ) {
     const secret = configService.get<string>('JWT_SECRET');
@@ -25,20 +23,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: secret,
-      // Pass the request to the validate method so we can access the raw token
-      passReqToCallback: true,
     });
   }
 
-  async validate(req: any, payload: JwtPayload) {
-    // Extract the token from the request
-    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    
-    // Check if token is blacklisted
-    if (token && this.tokenBlacklistService.isTokenBlacklisted(token)) {
-      throw new UnauthorizedException('Token has been revoked');
-    }
-
+  async validate(payload: JwtPayload) {
     const user = await this.userRepository.findOne({
       where: { id: payload.sub, isActive: true }
     });

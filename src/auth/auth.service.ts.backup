@@ -6,7 +6,6 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '../entities/user.entity';
 import { CreateUserDto, LoginDto, UserResponseDto } from '../dto';
 import { JwtPayload } from '../common/interfaces';
-import { TokenBlacklistService } from './token-blacklist.service';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +13,6 @@ export class AuthService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
-    private tokenBlacklistService: TokenBlacklistService,
   ) {}
 
   async register(createUserDto: CreateUserDto): Promise<{ user: UserResponseDto; accessToken: string }> {
@@ -72,13 +70,6 @@ export class AuthService {
     const userResponse = this.toUserResponse(user);
 
     return { user: userResponse, accessToken };
-  }
-
-  async logout(token: string): Promise<{ message: string }> {
-    // Add the token to blacklist
-    this.tokenBlacklistService.blacklistToken(token);
-    
-    return { message: 'Successfully logged out' };
   }
 
   async validateUser(userId: string): Promise<User> {
