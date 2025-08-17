@@ -1,10 +1,19 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Block, BlockStatus } from '../entities/block.entity';
 import { Tag } from '../entities/tag.entity';
 import { User } from '../entities/user.entity';
-import { CreateBlockDto, UpdateBlockDto, BlockQueryDto, BlockResponseDto } from '../dto';
+import {
+  CreateBlockDto,
+  UpdateBlockDto,
+  BlockQueryDto,
+  BlockResponseDto,
+} from '../dto';
 import { PaginatedResponse } from '../common/interfaces';
 
 @Injectable()
@@ -16,7 +25,10 @@ export class BlocksService {
     private tagRepository: Repository<Tag>,
   ) {}
 
-  async create(userId: string, createBlockDto: CreateBlockDto): Promise<BlockResponseDto> {
+  async create(
+    userId: string,
+    createBlockDto: CreateBlockDto,
+  ): Promise<BlockResponseDto> {
     const { title, reason, tagIds } = createBlockDto;
 
     // Create block
@@ -40,8 +52,19 @@ export class BlocksService {
     return this.toBlockResponse(await this.findById(savedBlock.id, userId));
   }
 
-  async findAll(userId: string, query: BlockQueryDto): Promise<PaginatedResponse<BlockResponseDto>> {
-    const { status, search, tagIds, startDate, endDate, page = 1, limit = 10 } = query;
+  async findAll(
+    userId: string,
+    query: BlockQueryDto,
+  ): Promise<PaginatedResponse<BlockResponseDto>> {
+    const {
+      status,
+      search,
+      tagIds,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 10,
+    } = query;
 
     const queryBuilder = this.createQueryBuilder(userId);
 
@@ -53,7 +76,7 @@ export class BlocksService {
     if (search) {
       queryBuilder.andWhere(
         '(block.title ILIKE :search OR block.reason ILIKE :search)',
-        { search: `%${search}%` }
+        { search: `%${search}%` },
       );
     }
 
@@ -80,7 +103,7 @@ export class BlocksService {
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: blocks.map(block => this.toBlockResponse(block)),
+      data: blocks.map((block) => this.toBlockResponse(block)),
       total,
       page,
       limit,
@@ -111,7 +134,11 @@ export class BlocksService {
     return this.toBlockResponse(block);
   }
 
-  async update(id: string, userId: string, updateBlockDto: UpdateBlockDto): Promise<BlockResponseDto> {
+  async update(
+    id: string,
+    userId: string,
+    updateBlockDto: UpdateBlockDto,
+  ): Promise<BlockResponseDto> {
     const block = await this.findById(id, userId);
 
     const { title, reason, status, resolvedAt, tagIds } = updateBlockDto;
@@ -146,7 +173,11 @@ export class BlocksService {
     return this.toBlockResponse(updatedBlock);
   }
 
-  async resolve(id: string, userId: string, resolvedAt?: Date): Promise<BlockResponseDto> {
+  async resolve(
+    id: string,
+    userId: string,
+    resolvedAt?: Date,
+  ): Promise<BlockResponseDto> {
     const block = await this.findById(id, userId);
 
     if (block.status === BlockStatus.RESOLVED) {
@@ -174,7 +205,7 @@ export class BlocksService {
       order: { createdAt: 'DESC' },
     });
 
-    return blocks.map(block => {
+    return blocks.map((block) => {
       // Update duration for ongoing blocks
       block.duration = Date.now() - block.startedAt.getTime();
       return this.toBlockResponse(block);
@@ -199,14 +230,15 @@ export class BlocksService {
       duration: block.duration,
       createdAt: block.createdAt,
       updatedAt: block.updatedAt,
-      tags: block.tags?.map(tag => ({
-        id: tag.id,
-        name: tag.name,
-        description: tag.description,
-        color: tag.color,
-        createdAt: tag.createdAt,
-        updatedAt: tag.updatedAt,
-      })) || [],
+      tags:
+        block.tags?.map((tag) => ({
+          id: tag.id,
+          name: tag.name,
+          description: tag.description,
+          color: tag.color,
+          createdAt: tag.createdAt,
+          updatedAt: tag.updatedAt,
+        })) || [],
     };
   }
 }

@@ -1,20 +1,25 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
   Patch,
-  Body, 
-  Param, 
+  Body,
+  Param,
   Query,
   Request,
   UseGuards,
-  ParseUUIDPipe 
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { BlocksService } from './blocks.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CreateBlockDto, UpdateBlockDto, BlockQueryDto, ResolveBlockDto } from '../dto';
+import {
+  CreateBlockDto,
+  UpdateBlockDto,
+  BlockQueryDto,
+  ResolveBlockDto,
+} from '../dto';
 import { AuthenticatedRequest } from '../common/interfaces';
 
 @Controller('blocks')
@@ -23,12 +28,18 @@ export class BlocksController {
   constructor(private readonly blocksService: BlocksService) {}
 
   @Post()
-  async create(@Request() req: AuthenticatedRequest, @Body() createBlockDto: CreateBlockDto) {
+  async create(
+    @Request() req: AuthenticatedRequest,
+    @Body() createBlockDto: CreateBlockDto,
+  ) {
     return this.blocksService.create(req.user.id, createBlockDto);
   }
 
   @Get()
-  async findAll(@Request() req: AuthenticatedRequest, @Query() query: BlockQueryDto) {
+  async findAll(
+    @Request() req: AuthenticatedRequest,
+    @Query() query: BlockQueryDto,
+  ) {
     return this.blocksService.findAll(req.user.id, query);
   }
 
@@ -38,7 +49,10 @@ export class BlocksController {
   }
 
   @Get(':id')
-  async findOne(@Request() req: AuthenticatedRequest, @Param('id', ParseUUIDPipe) id: string) {
+  async findOne(
+    @Request() req: AuthenticatedRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.blocksService.findOne(id, req.user.id);
   }
 
@@ -46,7 +60,7 @@ export class BlocksController {
   async update(
     @Request() req: AuthenticatedRequest,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateBlockDto: UpdateBlockDto
+    @Body() updateBlockDto: UpdateBlockDto,
   ) {
     return this.blocksService.update(id, req.user.id, updateBlockDto);
   }
@@ -55,13 +69,20 @@ export class BlocksController {
   async resolve(
     @Request() req: AuthenticatedRequest,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() resolveBlockDto?: ResolveBlockDto
+    @Body() resolveBlockDto?: ResolveBlockDto,
   ) {
-    return this.blocksService.resolve(id, req.user.id, resolveBlockDto?.resolvedAt);
+    return this.blocksService.resolve(
+      id,
+      req.user.id,
+      resolveBlockDto?.resolvedAt,
+    );
   }
 
   @Delete(':id')
-  async remove(@Request() req: AuthenticatedRequest, @Param('id', ParseUUIDPipe) id: string) {
+  async remove(
+    @Request() req: AuthenticatedRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     await this.blocksService.remove(id, req.user.id);
     return { message: 'Block deleted successfully' };
   }
